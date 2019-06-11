@@ -11,7 +11,7 @@
  * @date   Jan 24, 2019
  */
 
-#include <mola-fe-lidar-3d/LidarOdometry3D.h>
+#include <mola-lidar-segmentation/FilterEdgesPlanes.h>
 #include <mrpt/core/exceptions.h>
 #include <mrpt/gui/CDisplayWindow3D.h>
 #include <mrpt/maps/CPointsMapXYZI.h>
@@ -22,6 +22,8 @@
 #include <mrpt/system/filesystem.h>
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+
+MRPT_TODO("Improve: allow changing FilterEdgesPlanes from cli flags");
 
 // Declare supported cli switches ===========
 static TCLAP::CmdLine cmd("test-mola-fe-lidar-3d-segment-scan");
@@ -51,12 +53,6 @@ void do_scan_segment_test()
     timlog.leave("loadFromKittiVelodyneFile");
     std::cout << "Done. " << pc->size() << " points.\n";
 
-    // Filter it:
-    mola::LidarOdometry3D module;
-
-    // Not needed outside of a real SLAM system:
-    // module.initialize_common();
-
     // Load params:
     const auto cfg_file = arg_params_file.getValue();
     ASSERT_FILE_EXISTS_(cfg_file);
@@ -73,21 +69,24 @@ void do_scan_segment_test()
 
     std::cout << "Initializing with these params:\n" << str_params << "\n";
 
-    module.initialize(str_params);
+    MRPT_TODO("Convert to class factory!");
+    auto filter = mola::lidar_segmentation::FilterEdgesPlanes::Create();
+    filter->initialize(str_params);
 
-    mola::LidarOdometry3D::lidar_scan_t pcs;
-    pcs.pc.point_layers["original"] = pc;
+    // Convert into input type:
+    auto raw_input = mola::lidar_segmentation::input_raw_t(pc);
+    mp2p_icp::pointcloud_t pc_features;
 
-    {
-        mrpt::system::CTimeLoggerEntry tle(timlog, "filterPointCloud");
+    mrpt::system::CTimeLoggerEntry tle1(timlog, "filterPointCloud");
 
-        module.filterPointCloud(pcs);
-    }
+    filter->filter(raw_input, pc_features);
+
+    tle1.stop();
 
     // Display "layers":
     std::map<std::string, mrpt::gui::CDisplayWindow3D::Ptr> wins;
     int                                                     x = 5, y = 5;
-    for (const auto& layer : pcs.pc.point_layers)
+    for (const auto& layer : pc_features.point_layers)
     {
         const auto name = layer.first;
 

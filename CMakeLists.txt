@@ -20,9 +20,7 @@ find_package(mola-common REQUIRED)
 find_package(MRPT 1.9.9 REQUIRED COMPONENTS maps obs gui tclap)
 
 # Find the ICP C++ library:
-if (NOT TARGET mp2p_icp)
-find_package(mp2p_icp REQUIRED)
-endif()
+find_mola_package(mp2p_icp)
 
 # -----------------------
 # define lib:
@@ -39,6 +37,9 @@ mola_add_library(
 		mrpt::obs
 )
 
+find_mola_package(mola-fe-lidar-3d)
+
+
 # ----------------------
 # define app targets:
 mola_add_executable(
@@ -46,6 +47,7 @@ mola_add_executable(
 	SOURCES apps/mola-app-lidar-segment-scan.cpp
 	LINK_LIBRARIES
 	mp2p_icp
+	mola-fe-lidar-3d
 		mrpt::tclap
 		mrpt::gui
 		yaml-cpp

@@ -1,12 +1,23 @@
 /* -------------------------------------------------------------------------
- *  A repertory of multi primitive-to-primitive (MP2) ICP algorithms in C++
+ *   A Modular Optimization framework for Localization and mApping  (MOLA)
  * Copyright (C) 2018-2019 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
+/**
+ * @file   PointCloudToVoxelGrid.cpp
+ * @brief  Makes an index of a point cloud using a voxel grid.
+ * @author Jose Luis Blanco Claraco
+ * @date   Dec 17, 2018
+ */
 
-#include <mp2p_icp/PointCloudToVoxelGrid.h>
+/** \defgroup mola_lidar_segmentation_grp mola-lidar-segmentation
+ * 2D/3D LiDAR scan segmentation algorithms and utilities.
+ *
+ */
 
-using namespace mp2p_icp;
+#include <mola-lidar-segmentation/PointCloudToVoxelGrid.h>
+
+using namespace mola::lidar_segmentation;
 
 void PointCloudToVoxelGrid::resize(
     const mrpt::math::TPoint3D& min_corner,
