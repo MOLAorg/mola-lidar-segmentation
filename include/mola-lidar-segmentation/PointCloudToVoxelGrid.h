@@ -48,6 +48,7 @@ class PointCloudToVoxelGrid
     struct voxel_t
     {
         std::vector<std::size_t> indices;
+        bool                     is_empty{true};
     };
     using grid_t = mrpt::containers::CDynamicGrid3D<voxel_t, float>;
 
@@ -56,9 +57,6 @@ class PointCloudToVoxelGrid
     grid_t pts_voxels;
 
     std::vector<uint32_t> used_voxel_indices;
-
-   protected:
-    std::vector<bool> voxel_is_empty_;
 };
 
 }  // namespace mola::lidar_segmentation

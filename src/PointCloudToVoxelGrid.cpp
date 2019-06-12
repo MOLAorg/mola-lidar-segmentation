@@ -30,7 +30,6 @@ void PointCloudToVoxelGrid::resize(
         min_corner.x, max_corner.x, min_corner.y, max_corner.y, min_corner.z,
         max_corner.z, voxel_size, voxel_size);
 
-    voxel_is_empty_.assign(pts_voxels.getVoxelCount(), true);
     used_voxel_indices.clear();
     used_voxel_indices.reserve(pts_voxels.getVoxelCount() / 4);
 
@@ -70,13 +69,13 @@ void PointCloudToVoxelGrid::processPointCloud(const mrpt::maps::CPointsMap& p)
         const auto vxl_idx = pts_voxels.cellAbsIndexFromCXCYCZ(cx, cy, cz);
         if (vxl_idx == grid_t::INVALID_VOXEL_IDX) continue;
 
-        auto* c = pts_voxels.cellByIndex(cx, cy, cz);
+        auto* c = pts_voxels.cellByIndex(vxl_idx);
         if (!c) continue;
         c->indices.push_back(i);  // only if not out of grid range
 
-        if (voxel_is_empty_[vxl_idx])
+        if (c->is_empty)
         {
-            voxel_is_empty_[vxl_idx] = false;
+            c->is_empty = false;
             used_voxel_indices.push_back(vxl_idx);
         }
     }
@@ -86,8 +85,11 @@ void PointCloudToVoxelGrid::clear()
 {
     // for (auto& c : pts_voxels) c.indices.clear();
     for (auto idx : used_voxel_indices)
-        pts_voxels.cellByIndex(idx)->indices.clear();
+    {
+        auto c = pts_voxels.cellByIndex(idx);
+        c->indices.clear();
+        c->is_empty = true;
+    }
 
-    voxel_is_empty_.assign(pts_voxels.getVoxelCount(), true);
     used_voxel_indices.clear();
 }
