@@ -37,17 +37,13 @@ mola_add_library(
 		mrpt::obs
 )
 
-find_mola_package(mola-fe-lidar-3d)
-
-
 # ----------------------
 # define app targets:
 mola_add_executable(
 	TARGET  mola-app-lidar-segment-scan
 	SOURCES apps/mola-app-lidar-segment-scan.cpp
 	LINK_LIBRARIES
-	mp2p_icp
-	mola-fe-lidar-3d
+		mp2p_icp
 		mrpt::tclap
 		mrpt::gui
 		yaml-cpp
