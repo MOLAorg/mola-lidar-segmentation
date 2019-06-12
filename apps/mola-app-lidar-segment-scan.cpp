@@ -5,7 +5,7 @@
  * ------------------------------------------------------------------------- */
 
 /**
- * @file   test-mola-fe-lidar-3d-segment-scan.cpp
+ * @file   test-mola-fe-lidar-segment-scan.cpp
  * @brief  test for 3D lidar scan segmentation
  * @author Jose Luis Blanco Claraco
  * @date   Jan 24, 2019
@@ -27,7 +27,7 @@
 MRPT_TODO("Improve: allow changing FilterEdgesPlanes from cli flags");
 
 // Declare supported cli switches ===========
-static TCLAP::CmdLine cmd("test-mola-fe-lidar-3d-segment-scan");
+static TCLAP::CmdLine cmd("test-mola-fe-lidar-segment-scan");
 
 static TCLAP::ValueArg<std::string> arg_lidar_kitti_file(
     "k", "input-kitti-file", "Load 3D scan from a Kitti lidar (.bin) file",
