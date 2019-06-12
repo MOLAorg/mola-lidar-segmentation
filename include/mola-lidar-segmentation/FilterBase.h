@@ -15,14 +15,11 @@
 #include <mola-lidar-segmentation/FilterParameters.h>
 #include <mp2p_icp/pointcloud.h>
 #include <mrpt/maps/CPointsMap.h>
-#include <mrpt/obs/CObservation2DRangeScan.h>  // 2D lidar
-#include <mrpt/obs/CObservation3DRangeScan.h>  // RGBD cameras
-#include <mrpt/obs/CObservationVelodyneScan.h>  // 3D lidar
+#include <mrpt/obs/obs_frwds.h>
 #include <mrpt/rtti/CObject.h>
 #include <mrpt/system/COutputLogger.h>
 #include <cstdint>
 #include <stdexcept>
-#include <variant>
 
 namespace mola::lidar_segmentation
 {
@@ -38,13 +35,6 @@ struct NotImplementedError : public std::runtime_error
     }
 };
 
-/** Possible input types for point-cloud filters.
- * \sa FilterBase
- * \ingroup mola_lidar_segmentation_grp
- */
-using input_raw_t = std::variant<
-    std::monostate, mrpt::obs::CObservation::Ptr, mrpt::maps::CPointsMap::Ptr>;
-
 /** Provides filter() methods to convert a raw point cloud into segments,
  * features, etc. depending on the derived class implementation.
  *
@@ -52,7 +42,7 @@ using input_raw_t = std::variant<
  * - 2D LiDAR range scans (mrpt::obs::CObservation2DRangeScan)
  * - 3D Velodyne scans (mrpt::obs::CObservationVelodyneScan)
  * - 3D RGBD camera images (mrpt::obs::CObservation3DRangeScan)
- * - Generic 2D/3D point clouds (mrpt::maps::CPointsMap)
+ * - Generic 2D/3D point clouds (mrpt::obs::CObservationPointCloud)
  *
  * Notice that the methods using scans instead of point cloud have
  * computational advantages since they have a direct access to the raw
@@ -88,16 +78,17 @@ class FilterBase : public mrpt::rtti::CObject,  // RTTI support
      * implementation-specific parameters. */
     virtual void initialize(const std::string& cfg_block) = 0;
 
-    /** See docs above for FilterBase */
-    void filter(const input_raw_t& input_raw, mp2p_icp::pointcloud_t& out);
+    /** See docs above for FilterBase.
+     * This method dispatches the observation by type to the corresponding
+     * virtual method
+     */
+    void filter(
+        const mrpt::obs::CObservation::Ptr& input_raw,
+        mp2p_icp::pointcloud_t&             out);
 
     /** @} */
 
    protected:
-    /** Dispatch the observation by type to the corresponding virtual method */
-    void filterObservation(
-        const mrpt::obs::CObservation::Ptr& o, mp2p_icp::pointcloud_t& out);
-
     // To be overrided in derived classes, if implemented:
     /** Process a 2D lidar scan. \return false if not implemented */
     virtual bool filterScan2D(

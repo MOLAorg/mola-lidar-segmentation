@@ -15,6 +15,7 @@
 #include <mrpt/core/exceptions.h>
 #include <mrpt/gui/CDisplayWindow3D.h>
 #include <mrpt/maps/CPointsMapXYZI.h>
+#include <mrpt/obs/CObservationPointCloud.h>
 #include <mrpt/opengl/COpenGLScene.h>
 #include <mrpt/opengl/stock_objects.h>
 #include <mrpt/otherlibs/tclap/CmdLine.h>
@@ -74,7 +75,8 @@ void do_scan_segment_test()
     filter->initialize(str_params);
 
     // Convert into input type:
-    auto raw_input = mola::lidar_segmentation::input_raw_t(pc);
+    auto raw_input        = mrpt::obs::CObservationPointCloud::Create();
+    raw_input->pointcloud = pc;
     mp2p_icp::pointcloud_t pc_features;
 
     mrpt::system::CTimeLoggerEntry tle1(timlog, "filterPointCloud");

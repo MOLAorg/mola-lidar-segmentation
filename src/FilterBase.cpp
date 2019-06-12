@@ -10,9 +10,12 @@
  * @date   Jun 10, 2019
  */
 
-#include <mola-kernel/variant_helper.h>  // overloaded{}
 #include <mola-lidar-segmentation/FilterBase.h>
 #include <mrpt/maps/CSimplePointsMap.h>
+#include <mrpt/obs/CObservation2DRangeScan.h>
+#include <mrpt/obs/CObservation3DRangeScan.h>
+#include <mrpt/obs/CObservationPointCloud.h>
+#include <mrpt/obs/CObservationVelodyneScan.h>
 #include <yaml-cpp/yaml.h>
 
 IMPLEMENTS_VIRTUAL_MRPT_OBJECT_NS_PREFIX(
@@ -21,28 +24,6 @@ IMPLEMENTS_VIRTUAL_MRPT_OBJECT_NS_PREFIX(
 using namespace mola::lidar_segmentation;
 
 void FilterBase::filter(
-    const input_raw_t& input_raw, mp2p_icp::pointcloud_t& out)
-{
-    MRPT_START
-
-    std::visit(
-        overloaded{
-            [&](const mrpt::obs::CObservation::Ptr& o) {
-                filterObservation(o, out);
-            },
-            [&](const mrpt::maps::CPointsMap& obs) {
-                filterPointCloud(obs, out);
-            },
-            [this]([[maybe_unused]] auto i) {
-                THROW_EXCEPTION("Unknown input type!");
-            },
-        },
-        input_raw);
-
-    MRPT_END
-}
-
-void FilterBase::filterObservation(
     const mrpt::obs::CObservation::Ptr& o, mp2p_icp::pointcloud_t& out)
 {
     MRPT_START
@@ -50,7 +31,12 @@ void FilterBase::filterObservation(
 
     bool processed = false;
 
-    if (auto o1 = mrpt::ptr_cast<CObservation2DRangeScan>::from(o); o1)
+    if (auto o0 = mrpt::ptr_cast<CObservationPointCloud>::from(o); o0)
+    {
+        ASSERT_(o0->pointcloud);
+        processed = filterPointCloud(*o0->pointcloud, out);
+    }
+    else if (auto o1 = mrpt::ptr_cast<CObservation2DRangeScan>::from(o); o1)
         processed = filterScan2D(*o1, out);
     else if (auto o2 = mrpt::ptr_cast<CObservation3DRangeScan>::from(o); o2)
         processed = filterScan3D(*o2, out);
