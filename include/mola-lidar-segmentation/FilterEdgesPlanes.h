@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <mola-lidar-segmentation/FilterBase.h>
+#include <mola-lidar-segmentation/LidarFilterBase.h>
 #include <mola-lidar-segmentation/PointCloudToVoxelGrid.h>
 #include <mp2p_icp/pointcloud.h>
 #include <mrpt/maps/CPointsMap.h>
@@ -24,7 +24,7 @@ namespace mola::lidar_segmentation
  *
  * \ingroup mola_lidar_segmentation_grp
  */
-class FilterEdgesPlanes : public mola::lidar_segmentation::FilterBase
+class FilterEdgesPlanes : public mola::lidar_segmentation::LidarFilterBase
 {
     DEFINE_MRPT_OBJECT(FilterEdgesPlanes)
    public:

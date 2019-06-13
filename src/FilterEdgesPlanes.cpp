@@ -16,7 +16,7 @@
 #include <yaml-cpp/yaml.h>
 
 IMPLEMENTS_MRPT_OBJECT_NS_PREFIX(
-    FilterEdgesPlanes, mola::lidar_segmentation::FilterBase,
+    FilterEdgesPlanes, mola::lidar_segmentation::LidarFilterBase,
     mola::lidar_segmentation);
 
 using namespace mola::lidar_segmentation;

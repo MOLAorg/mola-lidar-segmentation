@@ -4,7 +4,7 @@
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
- * @file   FilterBase.h
+ * @file   LidarFilterBase.h
  * @brief  Base virtual class for point cloud filters
  * @author Jose Luis Blanco Claraco
  * @date   Jun 10, 2019
@@ -23,7 +23,7 @@
 
 namespace mola::lidar_segmentation
 {
-/** Used in FilterBase
+/** Used in LidarFilterBase
  * \ingroup mola_lidar_segmentation_grp
  */
 struct NotImplementedError : public std::runtime_error
@@ -65,10 +65,10 @@ struct NotImplementedError : public std::runtime_error
  *
  * \ingroup mola_lidar_segmentation_grp
  */
-class FilterBase : public mrpt::rtti::CObject,  // RTTI support
+class LidarFilterBase : public mrpt::rtti::CObject,  // RTTI support
                    public mrpt::system::COutputLogger  // Logging support
 {
-    DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase)
+    DEFINE_VIRTUAL_MRPT_OBJECT(LidarFilterBase)
 
    public:
     /** \name API for all filtering/segmentation algorithms
@@ -78,7 +78,7 @@ class FilterBase : public mrpt::rtti::CObject,  // RTTI support
      * implementation-specific parameters. */
     virtual void initialize(const std::string& cfg_block) = 0;
 
-    /** See docs above for FilterBase.
+    /** See docs above for LidarFilterBase.
      * This method dispatches the observation by type to the corresponding
      * virtual method
      */

@@ -4,13 +4,13 @@
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
- * @file   FilterBase.cpp
+ * @file   LidarFilterBase.cpp
  * @brief  Base virtual class for point cloud filters
  * @author Jose Luis Blanco Claraco
  * @date   Jun 10, 2019
  */
 
-#include <mola-lidar-segmentation/FilterBase.h>
+#include <mola-lidar-segmentation/LidarFilterBase.h>
 #include <mrpt/maps/CSimplePointsMap.h>
 #include <mrpt/obs/CObservation2DRangeScan.h>
 #include <mrpt/obs/CObservation3DRangeScan.h>
@@ -19,11 +19,11 @@
 #include <yaml-cpp/yaml.h>
 
 IMPLEMENTS_VIRTUAL_MRPT_OBJECT_NS_PREFIX(
-    FilterBase, mrpt::rtti::CObject, mola::lidar_segmentation);
+    LidarFilterBase, mrpt::rtti::CObject, mola::lidar_segmentation);
 
 using namespace mola::lidar_segmentation;
 
-void FilterBase::filter(
+void LidarFilterBase::filter(
     const mrpt::obs::CObservation::Ptr& o, mp2p_icp::pointcloud_t& out)
 {
     MRPT_START
@@ -75,28 +75,28 @@ void FilterBase::filter(
     MRPT_END
 }
 
-bool FilterBase::filterScan2D(  //
+bool LidarFilterBase::filterScan2D(  //
     [[maybe_unused]] const mrpt::obs::CObservation2DRangeScan& pc,
     [[maybe_unused]] mp2p_icp::pointcloud_t&                   out)
 {
     return false;  // Not implemented
 }
 
-bool FilterBase::filterVelodyneScan(  //
+bool LidarFilterBase::filterVelodyneScan(  //
     [[maybe_unused]] const mrpt::obs::CObservationVelodyneScan& pc,
     [[maybe_unused]] mp2p_icp::pointcloud_t&                    out)
 {
     return false;  // Not implemented
 }
 
-bool FilterBase::filterScan3D(  //
+bool LidarFilterBase::filterScan3D(  //
     [[maybe_unused]] const mrpt::obs::CObservation3DRangeScan& pc,
     [[maybe_unused]] mp2p_icp::pointcloud_t&                   out)
 {
     return false;  // Not implemented
 }
 
-bool FilterBase::filterPointCloud(  //
+bool LidarFilterBase::filterPointCloud(  //
     [[maybe_unused]] const mrpt::maps::CPointsMap& pc,
     [[maybe_unused]] mp2p_icp::pointcloud_t&       out)
 {
