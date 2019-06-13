@@ -66,11 +66,13 @@ struct NotImplementedError : public std::runtime_error
  * \ingroup mola_lidar_segmentation_grp
  */
 class LidarFilterBase : public mrpt::rtti::CObject,  // RTTI support
-                   public mrpt::system::COutputLogger  // Logging support
+                        public mrpt::system::COutputLogger  // Logging support
 {
     DEFINE_VIRTUAL_MRPT_OBJECT(LidarFilterBase)
 
    public:
+    LidarFilterBase();
+
     /** \name API for all filtering/segmentation algorithms
      *  @{ */
 

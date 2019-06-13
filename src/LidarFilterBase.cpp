@@ -23,6 +23,11 @@ IMPLEMENTS_VIRTUAL_MRPT_OBJECT_NS_PREFIX(
 
 using namespace mola::lidar_segmentation;
 
+LidarFilterBase::LidarFilterBase()
+    : mrpt::system::COutputLogger("LidarFilterBase")
+{
+}
+
 void LidarFilterBase::filter(
     const mrpt::obs::CObservation::Ptr& o, mp2p_icp::pointcloud_t& out)
 {
