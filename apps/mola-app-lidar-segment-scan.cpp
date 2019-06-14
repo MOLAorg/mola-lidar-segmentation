@@ -33,6 +33,26 @@ static TCLAP::ValueArg<std::string> arg_lidar_kitti_file(
     "k", "input-kitti-file", "Load 3D scan from a Kitti lidar (.bin) file",
     true, "", "./00000.bin", cmd);
 
+// clang-format off
+static TCLAP::ValueArg<std::string> arg_lidar_pose(
+    "", "lidar-pose",
+    "Defines the 4x4 homogeneous matrix of the LiDAR sensor in the vehicle "
+    "frame.\n"
+    "Use Matlab format, quoted as a string. For example:\n"
+    "For KAIST left_VLP :\n"
+    " --lidar-pose \"[-5.1406e-01 -7.0220e-01 -4.9259e-01 -4.4069e-01;"
+    "           4.8648e-01 -7.1167e-01 5.0680e-01 3.9705e-01 ;"
+    "          -7.0644e-01  2.0893e-02 7.0745e-01 1.9095e+00 ;"
+    "           0 0 0 1 ]\"\n"
+    "For KAIST right_VLP:\n"
+    " --lidar-pose \"[-5.1215e-01 6.9924e-01 -4.9876e-01 -4.4988e-01;"
+    "      -4.9481e-01 -7.1485e-01 -4.9412e-01 -4.1671e-01;"
+    "      -7.0204e-01 -6.2641e-03 7.1210e-01 1.9129e+00;"
+    "      0 0 0 1 ]\"\n",
+    false, "",
+    "[1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1]", cmd);
+// clang-format on
+
 static TCLAP::ValueArg<std::string> arg_params_file(
     "c", "config-file",
     "Load parameters from a YAML config file, containing a top-level YAML "
@@ -53,6 +73,22 @@ void do_scan_segment_test()
     pc->loadFromKittiVelodyneFile(fil);
     timlog.leave("loadFromKittiVelodyneFile");
     std::cout << "Done. " << pc->size() << " points.\n";
+
+    // Set in the coordinate frame of the vehicle:
+    if (arg_lidar_pose.isSet())
+    {
+        mrpt::math::CMatrixDouble44 HM;
+        const auto                  sMat = arg_lidar_pose.getValue();
+        if (!HM.fromMatlabStringFormat(sMat))
+        {
+            THROW_EXCEPTION_FMT(
+                "Malformed matlab-like 4x4 homogeneous matrix: `%s`",
+                sMat.c_str());
+        }
+        auto p = mrpt::poses::CPose3D(HM);
+        std::cout << "Using sensor pose: " << p.asString() << "\n";
+        pc->changeCoordinatesReference(p);
+    }
 
     // Load params:
     const auto cfg_file = arg_params_file.getValue();
