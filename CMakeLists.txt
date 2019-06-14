@@ -21,6 +21,7 @@ find_package(MRPT 1.9.9 REQUIRED COMPONENTS maps obs gui tclap)
 
 # Find the ICP C++ library:
 find_mola_package(mp2p_icp)
+find_mola_package(mola-kernel)
 
 # -----------------------
 # define lib:
