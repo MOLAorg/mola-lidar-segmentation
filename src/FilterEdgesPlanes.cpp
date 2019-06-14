@@ -13,6 +13,7 @@
 #include <mola-kernel/yaml_helpers.h>
 #include <mola-lidar-segmentation/FilterEdgesPlanes.h>
 #include <mrpt/maps/CSimplePointsMap.h>
+#include <mrpt/math/ops_containers.h>  // dotProduct
 #include <yaml-cpp/yaml.h>
 
 IMPLEMENTS_MRPT_OBJECT_NS_PREFIX(
@@ -28,17 +29,17 @@ void FilterEdgesPlanes::initialize(const std::string& cfg_block)
     MRPT_START
 
     // Parse YAML:
-    auto c   = YAML::Load(cfg_block);
-    auto cfg = c["pointcloud_filter_params"];
+    auto cfg = YAML::Load(cfg_block);
     MRPT_LOG_DEBUG_STREAM("Loading these params:\n" << cfg);
 
-    YAML_LOAD_OPT(params_, voxel_filter_resolution, double);
-    YAML_LOAD_OPT(params_, voxel_filter_decimation, unsigned int);
-    YAML_LOAD_OPT(params_, full_pointcloud_decimation, unsigned int);
-    YAML_LOAD_OPT(params_, voxel_filter_max_e2_e0, float);
-    YAML_LOAD_OPT(params_, voxel_filter_max_e1_e0, float);
-    YAML_LOAD_OPT(params_, voxel_filter_min_e2_e0, float);
-    YAML_LOAD_OPT(params_, voxel_filter_min_e1_e0, float);
+    YAML_LOAD_REQ(params_, voxel_filter_resolution, double);
+    YAML_LOAD_REQ(params_, voxel_filter_decimation, unsigned int);
+    YAML_LOAD_REQ(params_, full_pointcloud_decimation, unsigned int);
+    YAML_LOAD_REQ(params_, voxel_filter_max_e2_e0, float);
+    YAML_LOAD_REQ(params_, voxel_filter_max_e1_e0, float);
+    YAML_LOAD_REQ(params_, voxel_filter_min_e2_e0, float);
+    YAML_LOAD_REQ(params_, voxel_filter_min_e1_e0, float);
+    YAML_LOAD_OPT(params_, voxel_filter_min_e1, float);
 
     filter_grid_.resize(
         {-75, -75.0, -10.0}, {75.0, 75.0, 10.0},
@@ -54,19 +55,20 @@ bool FilterEdgesPlanes::filterPointCloud(
 
     out.clear();
 
-    auto& pc_edges      = out.point_layers["edges"];
-    auto& pc_planes     = out.point_layers["planes"];
-    auto& pc_full_decim = out.point_layers["full_decim"];
-    if (!pc_edges) pc_edges = mrpt::maps::CSimplePointsMap::Create();
-    if (!pc_planes) pc_planes = mrpt::maps::CSimplePointsMap::Create();
-    if (!pc_full_decim) pc_full_decim = mrpt::maps::CSimplePointsMap::Create();
+    auto& pc_edges           = out.point_layers["edge_points"];
+    auto& pc_planes          = out.point_layers["plane_points"];
+    auto& pc_full_decim      = out.point_layers["full_decim"];
+    auto& pc_plane_centroids = out.point_layers["plane_centroids"];
 
-    pc_edges->clear();
+    pc_edges           = mrpt::maps::CSimplePointsMap::Create();
+    pc_planes          = mrpt::maps::CSimplePointsMap::Create();
+    pc_full_decim      = mrpt::maps::CSimplePointsMap::Create();
+    pc_plane_centroids = mrpt::maps::CSimplePointsMap::Create();
+
     pc_edges->reserve(pc.size() / 10);
-    pc_planes->clear();
     pc_planes->reserve(pc.size() / 10);
-    pc_full_decim->clear();
     pc_full_decim->reserve(pc.size() / 10);
+    pc_plane_centroids->reserve(pc.size() / 1000);
 
     filter_grid_.clear();
     filter_grid_.processPointCloud(pc);
@@ -79,6 +81,7 @@ bool FilterEdgesPlanes::filterPointCloud(
     const float max_e10 = params_.voxel_filter_max_e1_e0;
     const float min_e20 = params_.voxel_filter_min_e2_e0;
     const float min_e10 = params_.voxel_filter_min_e1_e0;
+    const float min_e1  = params_.voxel_filter_min_e1;
 
     std::size_t nEdgeVoxels = 0, nPlaneVoxels = 0, nTotalVoxels = 0;
     for (const auto& vxl_pts : filter_grid_.pts_voxels)
@@ -127,23 +130,51 @@ bool FilterEdgesPlanes::filterPointCloud(
         mrpt::maps::CPointsMap* dest = nullptr;
         if (e2 < max_e20 * e0 && e1 < max_e10 * e0)
         {
+            // Classified as EDGE
+            // ------------------------
             nEdgeVoxels++;
             dest = pc_edges.get();
         }
-        else if (e2 > min_e20 * e0 && e1 > min_e10 * e0)
+        else if (e2 > min_e20 * e0 && e1 > min_e10 * e0 && e1 > min_e1)
         {
+            // Classified as PLANE
+            // ------------------------
+            nPlaneVoxels++;
+
+            // Define a plane from its centroid + a normal:
+            const auto pl_c = mrpt::math::TPoint3D(mean);
+
+            // Normal = largest eigenvector:
+            const auto ev0 =
+                eig_vectors.extractColumn<mrpt::math::TVector3D>(0);
+            auto pl_n = mrpt::math::TVector3D(ev0.x, ev0.y, ev0.z);
+
+            // Normal direction criterion: make it to face towards the vehicle.
+            // We can use the dot product to find it out, since pointclouds are
+            // given in vehicle-frame coordinates.
+            {
+                // Unit vector: vehicle -> plane centroid:
+                ASSERT_ABOVE_(pl_c.norm(), 1e-3);
+                const auto u = pl_c * (1.0 / pl_c.norm());
+                const auto dot_prod =
+                    mrpt::math::dotProduct<3, double>(u, pl_n);
+
+                // It should be <0 if the normal is pointing to the vehicle.
+                // Otherwise, reverse the normal.
+                if (dot_prod > 0) pl_n = -pl_n;
+            }
+
+            // Add plane & centroid:
+            const auto pl = mrpt::math::TPlane3D(pl_c, pl_n);
+            out.planes.emplace_back(pl, pl_c);
+
+            // Also: add the centroid to this special layer:
+            pc_plane_centroids->insertPointFast(pl_c.x, pl_c.y, pl_c.z);
+
             // Filter out horizontal planes, since their uneven density
             // makes ICP fail to converge.
             // A plane on the ground has its 0'th eigenvector like [0 0 1]
-
-            const auto ev0 =
-                eig_vectors.extractColumn<mrpt::math::TVector3D>(0);
-
-            if (std::abs(ev0.z) < 0.9f)
-            {
-                nPlaneVoxels++;
-                dest = pc_planes.get();
-            }
+            if (std::abs(ev0.z) < 0.9f) { dest = pc_planes.get(); }
         }
         if (dest != nullptr)
         {
@@ -154,11 +185,16 @@ bool FilterEdgesPlanes::filterPointCloud(
                 dest->insertPointFast(xs[pt_idx], ys[pt_idx], zs[pt_idx]);
             }
         }
-        for (size_t i = 0; i < vxl_pts.indices.size();
-             i += params_.full_pointcloud_decimation)
+        // full_pointcloud_decimation=0 means dont use this layer
+        if (params_.full_pointcloud_decimation > 0)
         {
-            const auto pt_idx = vxl_pts.indices[i];
-            pc_full_decim->insertPointFast(xs[pt_idx], ys[pt_idx], zs[pt_idx]);
+            for (size_t i = 0; i < vxl_pts.indices.size();
+                 i += params_.full_pointcloud_decimation)
+            {
+                const auto pt_idx = vxl_pts.indices[i];
+                pc_full_decim->insertPointFast(
+                    xs[pt_idx], ys[pt_idx], zs[pt_idx]);
+            }
         }
     }
     MRPT_LOG_DEBUG_STREAM(

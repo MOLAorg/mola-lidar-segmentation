@@ -39,7 +39,8 @@ class FilterEdgesPlanes : public mola::lidar_segmentation::LidarFilterBase
         double       voxel_filter_resolution{.5};
         unsigned int voxel_filter_decimation{1};
         float        voxel_filter_max_e2_e0{30.f}, voxel_filter_max_e1_e0{30.f};
-        float voxel_filter_min_e2_e0{100.f}, voxel_filter_min_e1_e0{100.f};
+        float voxel_filter_min_e2_e0{100.f}, voxel_filter_min_e1_e0{100.f},
+            voxel_filter_min_e1{.0f};
     };
 
     /** Algorithm parameters */
