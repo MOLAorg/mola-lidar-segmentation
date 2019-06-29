@@ -14,6 +14,7 @@
 #include <mola-lidar-segmentation/FilterEdgesPlanes.h>
 #include <mrpt/maps/CSimplePointsMap.h>
 #include <mrpt/math/ops_containers.h>  // dotProduct
+#include <mrpt/obs/CObservation2DRangeScan.h>
 #include <yaml-cpp/yaml.h>
 
 IMPLEMENTS_MRPT_OBJECT_NS_PREFIX(
@@ -201,6 +202,26 @@ bool FilterEdgesPlanes::filterPointCloud(
         "[VoxelGridFilter] Voxel counts: total=" << nTotalVoxels
                                                  << " edges=" << nEdgeVoxels
                                                  << " planes=" << nPlaneVoxels);
+
+    return true;  // virtual method is implemented
+    MRPT_END
+}
+
+bool FilterEdgesPlanes::filterScan2D(
+    const mrpt::obs::CObservation2DRangeScan& obs, mp2p_icp::pointcloud_t& out)
+{
+    MRPT_START
+
+    out.clear();
+
+    auto& pc_edges = out.point_layers["edge_points"];
+    // auto& pc_planes = out.point_layers["plane_points"];
+
+    pc_edges = mrpt::maps::CSimplePointsMap::Create();
+    // pc_planes = mrpt::maps::CSimplePointsMap::Create();
+
+    MRPT_TODO("Dummy ");
+    obs.insertObservationInto(pc_edges.get());
 
     return true;  // virtual method is implemented
     MRPT_END

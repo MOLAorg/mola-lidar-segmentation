@@ -50,6 +50,9 @@ class FilterEdgesPlanes : public mola::lidar_segmentation::LidarFilterBase
     // See base docs
     bool filterPointCloud(
         const mrpt::maps::CPointsMap& pc, mp2p_icp::pointcloud_t& out) override;
+    bool filterScan2D(
+        const mrpt::obs::CObservation2DRangeScan& obs,
+        mp2p_icp::pointcloud_t&                   out) override;
 
    private:
     PointCloudToVoxelGrid filter_grid_;
