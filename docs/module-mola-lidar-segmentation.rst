@@ -1,3 +1,5 @@
+.. _mola-lidar-segmentation:
+
 ========================================
 Module: mola-lidar-segmentation
 ========================================
