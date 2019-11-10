@@ -26,7 +26,7 @@ namespace mola::lidar_segmentation
  */
 class FilterEdgesPlanes : public mola::lidar_segmentation::LidarFilterBase
 {
-    DEFINE_MRPT_OBJECT(FilterEdgesPlanes)
+    DEFINE_MRPT_OBJECT(FilterEdgesPlanes, mola::lidar_segmentation)
    public:
     FilterEdgesPlanes();
 

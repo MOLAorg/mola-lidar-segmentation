@@ -18,8 +18,8 @@
 #include <mrpt/obs/CObservationVelodyneScan.h>
 #include <yaml-cpp/yaml.h>
 
-IMPLEMENTS_VIRTUAL_MRPT_OBJECT_NS_PREFIX(
-    LidarFilterBase, mrpt::rtti::CObject, mola::lidar_segmentation);
+IMPLEMENTS_VIRTUAL_MRPT_OBJECT(
+    LidarFilterBase, mrpt::rtti::CObject, mola::lidar_segmentation)
 
 using namespace mola::lidar_segmentation;
 

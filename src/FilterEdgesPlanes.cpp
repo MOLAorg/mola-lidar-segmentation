@@ -17,9 +17,9 @@
 #include <mrpt/obs/CObservation2DRangeScan.h>
 #include <yaml-cpp/yaml.h>
 
-IMPLEMENTS_MRPT_OBJECT_NS_PREFIX(
+IMPLEMENTS_MRPT_OBJECT(
     FilterEdgesPlanes, mola::lidar_segmentation::LidarFilterBase,
-    mola::lidar_segmentation);
+    mola::lidar_segmentation)
 
 using namespace mola::lidar_segmentation;
 
