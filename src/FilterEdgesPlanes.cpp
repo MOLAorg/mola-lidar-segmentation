@@ -15,7 +15,7 @@
 #include <mrpt/maps/CSimplePointsMap.h>
 #include <mrpt/math/ops_containers.h>  // dotProduct
 #include <mrpt/obs/CObservation2DRangeScan.h>
-#include <yaml-cpp/yaml.h>
+#include <mrpt/containers/yaml.h>
 
 IMPLEMENTS_MRPT_OBJECT(
     FilterEdgesPlanes, mola::lidar_segmentation::LidarFilterBase,
@@ -30,7 +30,7 @@ void FilterEdgesPlanes::initialize(const std::string& cfg_block)
     MRPT_START
 
     // Parse YAML:
-    auto cfg = YAML::Load(cfg_block);
+    auto cfg = mrpt::containers::yaml::FromText(cfg_block);
     MRPT_LOG_DEBUG_STREAM("Loading these params:\n" << cfg);
 
     YAML_LOAD_REQ(params_, voxel_filter_resolution, double);

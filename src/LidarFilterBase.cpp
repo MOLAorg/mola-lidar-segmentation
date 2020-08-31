@@ -16,7 +16,7 @@
 #include <mrpt/obs/CObservation3DRangeScan.h>
 #include <mrpt/obs/CObservationPointCloud.h>
 #include <mrpt/obs/CObservationVelodyneScan.h>
-#include <yaml-cpp/yaml.h>
+#include <mrpt/containers/yaml.h>
 
 IMPLEMENTS_VIRTUAL_MRPT_OBJECT(
     LidarFilterBase, mrpt::rtti::CObject, mola::lidar_segmentation)
