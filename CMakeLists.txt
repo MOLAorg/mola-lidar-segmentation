@@ -32,10 +32,14 @@ mola_add_library(
 	TARGET ${PROJECT_NAME}
 	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
 	PUBLIC_LINK_LIBRARIES
-	mp2p_icp
+		mp2p_icp
 		mola-kernel
 		mrpt::maps
 		mrpt::obs
+	CMAKE_DEPENDENCIES
+		mola-kernel
+		mp2p_icp
+		mrpt-maps
 )
 
 # ----------------------
