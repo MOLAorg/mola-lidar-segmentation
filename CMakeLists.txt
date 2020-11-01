@@ -17,7 +17,12 @@ project(mola-lidar-segmentation LANGUAGES CXX)
 find_package(mola-common REQUIRED)
 
 # find dependencies:
-find_package(MRPT 1.9.9 REQUIRED COMPONENTS maps obs gui tclap)
+find_package(mrpt-maps)
+find_package(mrpt-maps)
+find_package(mrpt-obs)
+find_package(mrpt-gui)
+find_package(mrpt-tclap)
+find_package(mrpt-containers)
 
 # Find the ICP C++ library:
 find_mola_package(mp2p_icp)
@@ -51,6 +56,6 @@ mola_add_executable(
 		mp2p_icp
 		mrpt::tclap
 		mrpt::gui
-		yaml-cpp
+		mrpt::containers
 		${PROJECT_NAME}
 )
