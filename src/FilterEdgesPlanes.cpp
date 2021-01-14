@@ -10,7 +10,7 @@
  * @date   Jun 10, 2019
  */
 
-#include <mola-kernel/yaml_helpers.h>
+#include <mola-yaml/yaml_helpers.h>
 #include <mola-lidar-segmentation/FilterEdgesPlanes.h>
 #include <mrpt/maps/CSimplePointsMap.h>
 #include <mrpt/math/ops_containers.h>  // dotProduct
